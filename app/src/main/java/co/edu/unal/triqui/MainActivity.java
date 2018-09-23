@@ -37,31 +37,31 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         String text = hypothesis.getHypstr();
 
         switch (text){
-            case "one ":
+            case "uno":
                 gameBoard.playTurn(1,1);
                 break;
-            case "two ":
+            case "dos":
                 gameBoard.playTurn(1,2);
                 break;
-            case "three ":
+            case "tres":
                 gameBoard.playTurn(1,3);
                 break;
-            case "four ":
+            case "cuatro":
                 gameBoard.playTurn(2,1);
                 break;
-            case "five ":
+            case "cinco":
                 gameBoard.playTurn(2,2);
                 break;
-            case "six ":
+            case "seis":
                 gameBoard.playTurn(2,3);
                 break;
-            case "seven ":
+            case "siete":
                 gameBoard.playTurn(3,1);
                 break;
-            case "eight ":
+            case "ocho":
                 gameBoard.playTurn(3,2);
                 break;
-            case "nine ":
+            case "nueve":
                 gameBoard.playTurn(3,3);
                 break;
             default:
@@ -101,16 +101,15 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             File assetsDir = assets.syncAssets();
 
             recognizer = SpeechRecognizerSetup.defaultSetup()
-                    .setAcousticModel(new File(assetsDir, "en-us-ptm"))
-                    .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
+                    .setAcousticModel(new File(assetsDir, "cmusphinx-es-5.2"))
+                    .setDictionary(new File(assetsDir, "cmusphinx-es-5.2.dict"))
                     .setRawLogDir(assetsDir) // To disable logging of raw audio comment out this call (takes a lot of space on the device)
-                    .setKeywordThreshold(1e-20f)
                     .getRecognizer();
 
             recognizer.addListener(this);
 
             File digitsGrammar = new File(assetsDir, "digits.gram");
-            recognizer.addKeywordSearch(DIGITS_SEARCH, digitsGrammar);
+            recognizer.addGrammarSearch(DIGITS_SEARCH, digitsGrammar);
 
             reset();
         }
