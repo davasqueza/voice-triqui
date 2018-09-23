@@ -1,10 +1,128 @@
 package co.edu.unal.triqui;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import java.io.File;
+import java.io.IOException;
+
+import edu.cmu.pocketsphinx.Assets;
+import edu.cmu.pocketsphinx.Hypothesis;
+import edu.cmu.pocketsphinx.RecognitionListener;
+import edu.cmu.pocketsphinx.SpeechRecognizer;
+import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+
+import static android.widget.Toast.makeText;
+
+public class MainActivity extends AppCompatActivity implements RecognitionListener {
     GameBoard gameBoard;
+
+    private static final String DIGITS_SEARCH = "digits";
+    private SpeechRecognizer recognizer;
+    /* Used to handle permission request */
+    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+
+    @Override
+    public void onPartialResult(Hypothesis hypothesis) { }
+
+    @Override
+    public void onResult(Hypothesis hypothesis) {
+        if (hypothesis == null) { return;}
+
+        String text = hypothesis.getHypstr();
+
+        switch (text){
+            case "one ":
+                gameBoard.playTurn(1,1);
+                break;
+            case "two ":
+                gameBoard.playTurn(1,2);
+                break;
+            case "three ":
+                gameBoard.playTurn(1,3);
+                break;
+            case "four ":
+                gameBoard.playTurn(2,1);
+                break;
+            case "five ":
+                gameBoard.playTurn(2,2);
+                break;
+            case "six ":
+                gameBoard.playTurn(2,3);
+                break;
+            case "seven ":
+                gameBoard.playTurn(3,1);
+                break;
+            case "eight ":
+                gameBoard.playTurn(3,2);
+                break;
+            case "nine ":
+                gameBoard.playTurn(3,3);
+                break;
+            default:
+                showToast("No te he entendido, por favor inténtalo de nuevo");
+                break;
+        }
+    }
+
+    @Override
+    public void onError(Exception e) {
+
+    }
+
+    @Override
+    public void onTimeout() {
+
+    }
+
+    @Override
+    public void onBeginningOfSpeech() { }
+
+    @Override
+    public void onEndOfSpeech() {
+        reset();
+    }
+
+    private void setupRecognizer() {
+        // Check if user has given permission to record audio
+        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+            return;
+        }
+
+        try {
+            Assets assets = new Assets(MainActivity.this);
+            File assetsDir = assets.syncAssets();
+
+            recognizer = SpeechRecognizerSetup.defaultSetup()
+                    .setAcousticModel(new File(assetsDir, "en-us-ptm"))
+                    .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
+                    .setRawLogDir(assetsDir) // To disable logging of raw audio comment out this call (takes a lot of space on the device)
+                    .setKeywordThreshold(1e-20f)
+                    .getRecognizer();
+
+            recognizer.addListener(this);
+
+            File digitsGrammar = new File(assetsDir, "digits.gram");
+            recognizer.addKeywordSearch(DIGITS_SEARCH, digitsGrammar);
+
+            reset();
+        }
+        catch (IOException e) {
+            showToast("Hubo un error al intentar inicializar el reconocimiento por voz");
+        }
+    }
+
+    private void reset() {
+        recognizer.stop();
+        recognizer.startListening(DIGITS_SEARCH);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -12,5 +130,11 @@ public class MainActivity extends AppCompatActivity {
 
         gameBoard = new GameBoard(this);
         setContentView(gameBoard);
+
+        setupRecognizer();
+    }
+
+    void showToast(String text){
+        makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
     }
 }

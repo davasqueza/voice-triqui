@@ -86,7 +86,6 @@ public class GameBoard extends View {
 
                 if(x < columnLine && y < rowLine){
                     playTurn(row, column);
-                    invalidate();
                     return true;
                 }
             }
@@ -95,7 +94,7 @@ public class GameBoard extends View {
         return true;
     }
 
-    void playTurn(int row, int column){
+    public void playTurn(int row, int column){
         if(board[row-1][column-1] != BoardStatus.FREE){return;}
         board[row-1][column-1] = currentPlayer;
 
@@ -114,6 +113,8 @@ public class GameBoard extends View {
                         BoardStatus.SECOND : BoardStatus.FIRST;
                 break;
         }
+
+        invalidate();
     }
 
     void drawTurn(Canvas canvas, BoardStatus status, int row, int column){

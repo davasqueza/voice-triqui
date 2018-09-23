@@ -1,17 +1,9 @@
-#JSGF V1.0;
-
-grammar digits;
-
-<digit> = oh    |
-          zero  |
-          one   |
-          two   |
-          three |
-          four  |
-          five  |
-          six   |
-          seven |
-          eight |
-          nine  ;
-
-public <digits> = <digit>+;
+one /1e-1/
+two /1e-1/
+three /1e-1/
+four /1e-1/
+five /1e-1/
+six /1e-1/
+seven /1e-1/
+eight /1e-1/
+nine /1e-1/
